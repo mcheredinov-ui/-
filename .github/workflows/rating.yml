@@ -1,0 +1,30 @@
+name: shipment-rating
+
+on:
+  schedule:
+    # Каждый час в начале часа с 03:00 до 18:00 UTC = 06:00–21:00 МСК.
+    # GitHub Actions работает по UTC; бот внутри ещё раз проверяет московское время.
+    - cron: '0 3-18 * * *'
+  workflow_dispatch:   # кнопка ручного запуска для проверки
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Установить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Установить зависимости
+        run: pip install -r requirements.txt
+
+      - name: Запустить бота
+        env:
+          B24_WEBHOOK: ${{ secrets.B24_WEBHOOK }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: python shipment_bot.py
